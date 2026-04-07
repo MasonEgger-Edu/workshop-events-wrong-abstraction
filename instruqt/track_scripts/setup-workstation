@@ -3,7 +3,7 @@
 # Pulls sandbox image, extracts assets + uv cache, installs tools, starts Temporal.
 set -euxo pipefail
 
-IMAGE="ghcr.io/masonegger/durable-wordle-instruqt:latest"
+IMAGE="ghcr.io/masonegger-edu/workshop-events-wrong-abstraction:latest"
 
 # -------------------------------------------------------------------
 # 1. Pull sandbox image and extract assets + uv cache

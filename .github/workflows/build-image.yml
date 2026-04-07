@@ -9,12 +9,11 @@ on:
       - ".github/workflows/build-image.yml"
   workflow_dispatch:
 
-env:
-  IMAGE: ghcr.io/${{ github.repository }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/masonegger-edu/workshop-events-wrong-abstraction
     permissions:
       contents: read
       packages: write
