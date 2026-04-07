@@ -55,16 +55,70 @@ cd /root/durable-wordle
 uv sync --frozen
 
 # -------------------------------------------------------------------
-# 6. Start Temporal dev server (background, persists across challenges)
-#    --db-filename ensures state survives even if the server is killed.
+# 6. Install and start code-server (VS Code in browser)
 # -------------------------------------------------------------------
-nohup temporal server start-dev \
-  --ip 0.0.0.0 \
-  --db-filename /root/temporal.db \
-  > /root/temporal-server.log 2>&1 &
+curl -fsSL https://code-server.dev/install.sh | sh
 
-sleep 3
+mkdir -p /root/.local/share/code-server/User
+cat > /root/.local/share/code-server/User/settings.json << 'EOF'
+{
+    "workbench.colorTheme": "Default Dark+",
+    "workbench.startupEditor": "none",
+    "security.workspace.trust.enabled": false,
+    "editor.fontSize": 14
+}
+EOF
 
-temporal workflow list --address localhost:7233 || true
+cat > /etc/systemd/system/code-server.service << 'EOF'
+[Unit]
+Description=Code Server
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+User=root
+ExecStart=/usr/bin/code-server --host 0.0.0.0 --port 8443 --cert --auth none
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable code-server
+systemctl start code-server
+
+# -------------------------------------------------------------------
+# 7. Start Temporal dev server (systemd, restarts on failure)
+# -------------------------------------------------------------------
+cat > /etc/systemd/system/temporal-server.service << 'EOF'
+[Unit]
+Description=Temporal Dev Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/root/.temporalio/bin/temporal server start-dev --ip 0.0.0.0 --db-filename /root/temporal.db
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/root/temporal-server.log
+StandardError=append:/root/temporal-server.log
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable temporal-server
+systemctl start temporal-server
+
+# Wait for Temporal server to be healthy
+echo "Waiting for Temporal server..."
+for attempt in $(seq 1 30); do
+  if temporal operator cluster health --address 127.0.0.1:7233 2>/dev/null | grep -q SERVING; then
+    echo "Temporal server healthy."
+    break
+  fi
+  sleep 3
+done
 
 echo "=== Track setup complete ==="

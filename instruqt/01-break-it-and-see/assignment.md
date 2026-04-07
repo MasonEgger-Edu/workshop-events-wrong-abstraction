@@ -1,23 +1,24 @@
 ---
 slug: break-it-and-see
+id: nsvwl7tngyw3
 type: challenge
 title: Break It and See What Happens
 teaser: Kill a running program and see how normal vs. durable execution handles it.
 tabs:
-  - title: Terminal
-    type: terminal
-    hostname: workstation
-    workdir: /root
-  - title: Code Editor
-    type: code
-    hostname: workstation
-    path: /root/durable-vs-normal-execution
-  - title: Temporal UI
-    type: service
-    hostname: workstation
-    port: 8233
+- id: uzzwrwo1miiv
+  title: Code Editor
+  type: service
+  hostname: workstation
+  path: ?folder=/root/durable-vs-normal-execution&openFile=/root/durable-vs-normal-execution/normal/counter.py&openFile=/root/durable-vs-normal-execution/durable/counter.py
+  port: 8443
+- id: 90fltb0qwwb2
+  title: Terminal
+  type: terminal
+  hostname: workstation
+  workdir: /root
 difficulty: basic
 timelimit: 600
+enhanced_loading: null
 ---
 
 # Normal Execution: It Forgets Everything
@@ -72,6 +73,6 @@ uv run python worker.py
 
 Same logic. Same kill. But the durable version resumed because **Temporal recorded every step**. When the worker restarted, it replayed the history to rebuild state automatically.
 
-**Optional:** Click the **Code Editor** tab to compare `normal/counter.py` with `durable/counter.py`. Click the **Temporal UI** tab to see the workflow's event history.
+**Optional:** Click the **Code Editor** tab to compare `normal/counter.py` with `durable/counter.py` side by side.
 
 When the presenter moves on, click **Next**.

@@ -1,5 +1,5 @@
-slug: durable-execution-with-temporal
-type: track
+slug: events-wrong-abstraction
+id: onuapb11gg80
 title: Durable Execution with Temporal
 teaser: Break things and watch them recover — experience durable execution firsthand.
 description: |-
@@ -10,18 +10,19 @@ description: |-
   worker mid-game, and see your game state survive.
 icon: https://raw.githubusercontent.com/temporalio/awesome-temporal/main/temporal-logo.png
 tags:
-  - temporal
-  - durable-execution
-  - python
+- durable-execution
+- python
+- temporal
 owner: temporal
 developers:
-  - mason@temporal.io
+- mason.egger@temporal.io
 idle_timeout: 1200
 timelimit: 2400
 lab_config:
-  overlay: false
-  width: 33
-  position: right
   sidebar_enabled: true
   feedback_recap_enabled: false
+  feedback_tab_enabled: false
   loadingMessages: true
+  hideStopButton: false
+checksum: "3525375857304272810"
+enhanced_loading: false
