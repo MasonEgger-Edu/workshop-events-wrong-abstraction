@@ -1,0 +1,17 @@
+#!/bin/bash
+# ABOUTME: Challenge 1 setup — ensure Temporal server is running and counter
+# projects are ready. Track setup already installed everything.
+set -euxo pipefail
+
+export PATH="/root/.local/bin:/root/.temporalio/bin:$PATH"
+
+# Ensure Temporal dev server is still running
+if ! pgrep -f "temporal server start-dev" > /dev/null; then
+  nohup temporal server start-dev \
+    --ip 0.0.0.0 \
+    --db-filename /root/temporal.db \
+    > /root/temporal-server.log 2>&1 &
+  sleep 3
+fi
+
+echo "=== Challenge 1 setup complete ==="

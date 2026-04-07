@@ -1,0 +1,6 @@
+version: "3"
+virtualmachines:
+  - name: workstation
+    image: instruqt/docker-28-3
+    machine_type: n1-standard-2
+    shell: /bin/bash

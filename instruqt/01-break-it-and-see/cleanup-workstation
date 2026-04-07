@@ -1,0 +1,4 @@
+#!/bin/bash
+# ABOUTME: Challenge 1 cleanup — no-op. Leave state intact for the learner
+# to continue exploring if they want.
+exit 0

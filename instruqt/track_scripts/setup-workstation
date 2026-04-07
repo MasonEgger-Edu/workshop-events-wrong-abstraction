@@ -1,0 +1,70 @@
+#!/bin/bash
+# ABOUTME: Track-level setup script for the Instruqt workstation VM.
+# Pulls sandbox image, extracts assets + uv cache, installs tools, starts Temporal.
+set -euxo pipefail
+
+IMAGE="ghcr.io/masonegger/durable-wordle-instruqt:latest"
+
+# -------------------------------------------------------------------
+# 1. Pull sandbox image and extract assets + uv cache
+# -------------------------------------------------------------------
+docker pull "$IMAGE"
+docker create --name tmp-sandbox "$IMAGE"
+docker cp tmp-sandbox:/opt/assets /root/assets
+docker cp tmp-sandbox:/root/.cache/uv /root/.cache/uv
+docker rm tmp-sandbox
+
+# Move projects to their final locations
+mv /root/assets/durable-vs-normal-execution /root/durable-vs-normal-execution
+mv /root/assets/durable-wordle /root/durable-wordle
+rm -rf /root/assets
+
+# -------------------------------------------------------------------
+# 2. Install uv (Python package manager)
+# -------------------------------------------------------------------
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="/root/.local/bin:$PATH"
+
+uv --version
+
+# -------------------------------------------------------------------
+# 3. Install Temporal CLI
+# -------------------------------------------------------------------
+curl -sSf https://temporal.download/cli.sh | sh
+export PATH="/root/.temporalio/bin:$PATH"
+
+temporal --version
+
+# -------------------------------------------------------------------
+# 4. Make PATH changes persistent for the learner
+# -------------------------------------------------------------------
+cat >> /root/.bashrc << 'PATHS'
+export PATH="/root/.local/bin:/root/.temporalio/bin:$PATH"
+PATHS
+
+# -------------------------------------------------------------------
+# 5. Install deps (fast — uv cache is pre-warmed from the image)
+# -------------------------------------------------------------------
+cd /root/durable-vs-normal-execution/durable
+uv sync
+
+cd /root/durable-vs-normal-execution/normal
+uv sync
+
+cd /root/durable-wordle
+uv sync --frozen
+
+# -------------------------------------------------------------------
+# 6. Start Temporal dev server (background, persists across challenges)
+#    --db-filename ensures state survives even if the server is killed.
+# -------------------------------------------------------------------
+nohup temporal server start-dev \
+  --ip 0.0.0.0 \
+  --db-filename /root/temporal.db \
+  > /root/temporal-server.log 2>&1 &
+
+sleep 3
+
+temporal workflow list --address localhost:7233 || true
+
+echo "=== Track setup complete ==="

@@ -1,0 +1,8 @@
+#!/bin/bash
+# ABOUTME: Challenge 1 check — always passes. This is a follow-along demo,
+# not a graded exercise. Learners advance when the presenter moves on.
+set -euxo pipefail
+
+# No validation needed — this is an interactive demo.
+# The learner clicks "Next" when the presenter advances.
+exit 0

@@ -1,0 +1,27 @@
+slug: durable-execution-with-temporal
+type: track
+title: Durable Execution with Temporal
+teaser: Break things and watch them recover — experience durable execution firsthand.
+description: |-
+  In this hands-on track you'll see what happens when normal code crashes
+  versus code backed by Temporal's durable execution. First you'll kill a
+  simple counter and watch it lose its state, then kill a durable counter
+  and watch it resume. Then you'll play a full game of Wordle, kill the
+  worker mid-game, and see your game state survive.
+icon: https://raw.githubusercontent.com/temporalio/awesome-temporal/main/temporal-logo.png
+tags:
+  - temporal
+  - durable-execution
+  - python
+owner: temporal
+developers:
+  - mason@temporal.io
+idle_timeout: 1200
+timelimit: 2400
+lab_config:
+  overlay: false
+  width: 33
+  position: right
+  sidebar_enabled: true
+  feedback_recap_enabled: false
+  loadingMessages: true

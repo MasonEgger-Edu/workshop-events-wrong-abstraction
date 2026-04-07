@@ -1,0 +1,6 @@
+#!/bin/bash
+# ABOUTME: Challenge 2 cleanup — kill worker and web server processes so the
+# track can shut down cleanly.
+pkill -f "durable_wordle.worker" || true
+pkill -f "uvicorn.*durable_wordle" || true
+exit 0
