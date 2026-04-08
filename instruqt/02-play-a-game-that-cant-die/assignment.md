@@ -5,12 +5,6 @@ type: challenge
 title: Play a Game That Can't Die
 teaser: Play Wordle, kill the backend, bring it back — your game survives.
 tabs:
-- id: 52rfmpjmvfet
-  title: Code Editor
-  type: service
-  hostname: workstation
-  path: ?folder=/root/durable-wordle/src/durable_wordle&openFile=/root/durable-wordle/src/durable_wordle/workflow.py
-  port: 8443
 - id: sia1gwr3eyrr
   title: Worker
   type: terminal
@@ -31,6 +25,12 @@ tabs:
   type: service
   hostname: workstation
   port: 8233
+- id: 52rfmpjmvfet
+  title: Code Editor
+  type: service
+  hostname: workstation
+  path: ?folder=/root/durable-wordle/src/durable_wordle
+  port: 8443
 difficulty: basic
 timelimit: 900
 enhanced_loading: null
@@ -38,13 +38,15 @@ enhanced_loading: null
 
 # Start the App
 
-In the **Worker** tab, start the Temporal worker:
+That was a counter. Now let's try a real application — a full game of Wordle, powered by Temporal.
+
+In the **Worker** tab:
 
 ```bash
 uv run python -m durable_wordle.worker
 ```
 
-In the **Web Server** tab, start the web server:
+In the **Web Server** tab:
 
 ```bash
 uv run uvicorn --factory durable_wordle.api:create_production_app --host 0.0.0.0 --port 8000
@@ -54,54 +56,52 @@ uv run uvicorn --factory durable_wordle.api:create_production_app --host 0.0.0.0
 
 # Play Wordle
 
-Click the **Wordle** tab. Try to solve it — it's a real game of Wordle.
+Click the **Wordle** tab. Try to solve it.
 
 ---
 
 # Peek Behind the Curtain
 
-Click the **Temporal UI** tab. You should see your game's workflow listed. Click into it and explore the event history.
+Click the **Temporal UI** tab. Find your game's workflow and click into it.
 
-Find the first **UpdateWorkflowExecution** event — look at the `select_word` activity result inside it. That's the target word, right there in plain text. Every step of your game is recorded as a Temporal event.
+Every guess, every word validation, every piece of game state is recorded as an event. Look at the `select_word` activity result — that's the answer, in plain text.
 
 ---
 
 # Start a Random Game
 
-Go back to the **Wordle** tab. If your game is finished, click the **↻** button. If it's still in progress, refresh the page.
+Go back to the **Wordle** tab. If your game is finished, click the **↻** button. If it's still going, refresh the page.
 
-Before submitting your first guess, toggle the **Word Selection** switch from **Daily** to **Random**.
-
-Now submit a word to start the game.
+Toggle **Word Selection** from **Daily** to **Random**, then submit a word.
 
 ---
 
 # Break It
 
-Go to the **Worker** tab and press **Ctrl+C** to kill the worker.
+Go to the **Worker** tab and **Ctrl+C** to kill the worker.
 
-Go back to the **Wordle** tab and submit another guess. The page will hang — the worker is dead, so Temporal can't process your guess.
+Go back to the **Wordle** tab and submit a guess. The page hangs — the worker is dead.
 
 ---
 
 # Bring It Back
 
-Go to the **Worker** tab and restart the worker:
+Restart the worker:
 
 ```bash
 uv run python -m durable_wordle.worker
 ```
 
-Now go back to the **Wordle** tab. Your guess went through — the page updated with your result.
-
-**What just happened?** When the worker restarted, Temporal replayed the workflow's event history to rebuild the game state in memory. Then it processed your pending guess as if nothing had gone wrong. No database, no Redis — the workflow IS the state.
+Go back to the **Wordle** tab. Your guess went through. The game is exactly where you left it — Temporal replayed the history and rebuilt the state.
 
 ---
 
 # Win by Cheating
 
-Go to the **Temporal UI** tab. Find your new random game's workflow and dig into the event history. Find the target word in the `select_word` activity result.
+Go to the **Temporal UI** tab. Find your random game's workflow. Dig into the event history and find the target word.
 
-Go back to the **Wordle** tab and type it in. You win.
+Go back and type it in. You win.
+
+**Want to explore the code?** Click the **Code Editor** tab.
 
 When the presenter moves on, click **Next**.

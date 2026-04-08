@@ -5,74 +5,100 @@ type: challenge
 title: Break It and See What Happens
 teaser: Kill a running program and see how normal vs. durable execution handles it.
 tabs:
-- id: uzzwrwo1miiv
-  title: Code Editor
-  type: service
-  hostname: workstation
-  path: ?folder=/root/durable-vs-normal-execution&openFile=/root/durable-vs-normal-execution/normal/counter.py&openFile=/root/durable-vs-normal-execution/durable/counter.py
-  port: 8443
 - id: 90fltb0qwwb2
   title: Terminal
   type: terminal
   hostname: workstation
   workdir: /root
+- id: uzzwrwo1miiv
+  title: Code Editor
+  type: service
+  hostname: workstation
+  path: ?folder=/root/durable-vs-normal-execution
+  port: 8443
 difficulty: basic
 timelimit: 600
 enhanced_loading: null
 ---
 
-# Normal Execution: It Forgets Everything
+# The Code
 
-In the **Terminal** tab, run the normal counter:
+Two programs that count to 10. Same logic, different runtimes.
+
+**normal/counter.py:**
+
+```python
+async def main():
+    for i in range(1, 11):
+        logging.info(i)
+        await asyncio.sleep(1)
+```
+
+**durable/counter.py:**
+
+```python
+@workflow.defn
+class CountingWorkflow:
+    @workflow.run
+    async def run(self) -> None:
+        number = 0
+        while number < 10:
+            number = await workflow.execute_activity(
+                add_one, number,
+                start_to_close_timeout=timedelta(seconds=5),
+            )
+            workflow.logger.info(number)
+            await asyncio.sleep(1)
+```
+
+Let's kill them both and see what happens.
+
+---
+
+# Normal Execution
+
+In the **Terminal** tab:
 
 ```bash
 cd /root/durable-vs-normal-execution/normal
 uv run python counter.py
 ```
 
-Watch it count up. After it reaches **~5**, press **Ctrl+C** to kill it.
-
-Now run it again:
+Watch it count. After ~5, press **Ctrl+C**. Run it again:
 
 ```bash
 uv run python counter.py
 ```
 
-It starts over from 1. That's normal execution — when the process dies, the state is gone.
+Starts over from 1. State gone.
 
 ---
 
-# Durable Execution: It Remembers
+# Durable Execution
 
-Now let's try the durable version. In the terminal, start the workflow:
+Start the workflow:
 
 ```bash
 cd /root/durable-vs-normal-execution/durable
 uv run python starter.py
 ```
 
-Then start the worker (the thing that actually runs the code):
+Start the worker:
 
 ```bash
 uv run python worker.py
 ```
 
-Watch it count. After it reaches **~5**, press **Ctrl+C** to kill the **worker**.
-
-Now restart just the worker:
+Watch it count. After ~5, **Ctrl+C** to kill the worker. Now restart it:
 
 ```bash
 uv run python worker.py
 ```
 
-**It picks up where it left off.** That's durable execution — the workflow's state survived the crash.
+**It picks up where it left off.**
 
----
+Same logic. Same crash. But this time the state survived because Temporal recorded every step. When the worker restarted, it replayed the history and kept going.
 
-# What Just Happened?
-
-Same logic. Same kill. But the durable version resumed because **Temporal recorded every step**. When the worker restarted, it replayed the history to rebuild state automatically.
-
-**Optional:** Click the **Code Editor** tab to compare `normal/counter.py` with `durable/counter.py` side by side.
+**Want to explore?** Click the **Code Editor** tab to browse the source.
 
 When the presenter moves on, click **Next**.
